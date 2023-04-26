@@ -41,3 +41,108 @@ ggkeyboard(tkl, layout = "iso")
 ```
 
 ## Task 3: Color keyboard keys based on frequency of first letter
+
+### Color options
+
+dark blue - "#2D669B"
+light blue - "#359CA8"
+green - "#B8C222"
+yellow - "#EEDD49"
+orange - "#F2BC4A"
+dark orange - "#FB704A"
+red - "#BE372C"
+
+### Color scale
+
+```{r}
+
+# Summarize min, max, sd, and quantiles
+wordle_counts |>
+  summarize(
+    min = min(n),
+    mean = mean(n),
+    sd = sd(n),
+    max = max(n),
+    q20 = quantile(n, 0.20),
+    q40 = quantile(n, 0.40),
+    q60 = quantile(n, 0.60),
+    q80 = quantile(n, 0.80)
+  )
+
+# Plot histogram of first letter popularity
+ggplot(wordle_counts, aes(x = n)) +
+  geom_histogram(binwidth = 100)
+ggplot(wordle_counts, aes(x = first_letter, y = n)) +
+  geom_col() +
+  geom_hline(yintercept = 80)
+```
+Custom Colors
+
+- Peach         - "#FFEBE3" - 0
+- Salmon        = "#F8D3CE" - 20
+- Apricot       - "#F0B8A1" - 189
+- Coral         - "#E89E7F" - 325
+- Terracotta    - "#DC8461" - 595
+- Burnt Sienna  - "#D16A44" - 736
+- Rust          - "#C65027" - > 1000
+
+```{r}
+
+# Color coding
+wordle_counts <- wordle_counts %>%
+  mutate(
+    color = case_when(
+      n == 0                  ~ "#FFEBE3",
+      n <=  20                ~ "#F8D3CE",
+      n > 20  & n <= 189      ~ "#F0B8A1",
+      n > 189 & n <= 325      ~ "#E89E7F",
+      n > 325 & n <= 595      ~ "#DC8461",
+      n > 595 & n <= 1000     ~ "#D16A44",
+      n > 1000  ~ "#C65027"
+      ),
+    first_letter = str_to_upper(first_letter)
+  ) %>%
+  arrange(first_letter)
+
+wordle_counts
+```
+
+
+```{r}
+# Giving keys colors
+ggkeyboard(sixty_percent, palette = keyboard_palette("magic")) %>%
+  highlight_keys(
+    keys = c("Z", "X", "C", "V"), 
+    fill = c("#00FF00", "#FF00FF", "#00FFFF", "#FFA500"), 
+    alpha = 0.7, 
+    colour = NA
+    )
+ggkeyboard(sixty_percent, palette = keyboard_palette("magic")) %>%
+  highlight_keys(
+    keys = c("C", "N", "S"), 
+    fill = c("#00FF00", "#FF00FF", "#00FFFF"), 
+    alpha = 0.7, 
+    colour = NA
+    )
+
+```
+```{r}
+# Keys dataset, filter for first_letters
+keys <- read_csv("https://raw.githubusercontent.com/sharlagelfand/ggkeyboard/061f0d9084d76d576200e81439311983e1d50d93/data-raw/sixty_percent.csv")
+wordle_counts_ordered <- keys %>% 
+  filter(key_label %in% LETTERS) %>%
+  select(key) %>%
+  left_join(wordle_counts, by = c("key" = "first_letter"))
+keys
+```
+
+```{r}
+# Assigning the colors to keys
+ggkeyboard(sixty_percent, palette = keyboard_palette("magic")) %>%
+  highlight_keys(
+    keys = wordle_counts_ordered$key, 
+    fill = wordle_counts_ordered$color, 
+    alpha = 0.7, 
+    colour = NA
+    )
+```
