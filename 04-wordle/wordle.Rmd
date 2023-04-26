@@ -6,6 +6,8 @@ output: github_document
 ---
 
 ```{r load-packages, message = FALSE}
+#| label: packages
+#| message: false
 library(tidyverse)
 library(ggkeyboard) # https://github.com/sharlagelfand/ggkeyboard
 ```
@@ -19,6 +21,8 @@ library(ggkeyboard) # https://github.com/sharlagelfand/ggkeyboard
 From https://github.com/tabatkins/wordle-list.
 
 ```{r}
+#| label: wordle-dataset
+#| message: false
 
 # read wordle dataset
 wordle <- read_csv("https://raw.githubusercontent.com/tabatkins/wordle-list/main/words", col_names = "word")
@@ -37,6 +41,8 @@ wordle_counts
 ## Task 2: Draw a keyboard
 
 ```{r}
+#| label: ggkeyboard
+#| message: false
 ggkeyboard(tkl, layout = "iso")
 ```
 
@@ -55,6 +61,8 @@ red - "#BE372C"
 ### Color scale
 
 ```{r}
+#| label: word-counts
+#| message: false
 
 # Summarize min, max, sd, and quantiles
 wordle_counts |>
@@ -87,9 +95,11 @@ Custom Colors
 - Rust          - "#C65027" - > 1000
 
 ```{r}
+#| label: color-freq
+#| message: false
 
 # Color coding
-wordle_counts <- wordle_counts %|>
+wordle_counts <- wordle_counts |>
   mutate(
     color = case_when(
       n == 0                  ~ "#FFEBE3",
@@ -109,6 +119,9 @@ wordle_counts
 
 
 ```{r}
+#| label: key-colors
+#| message: false
+
 # Giving keys colors
 ggkeyboard(sixty_percent, palette = keyboard_palette("magic")) |>
   highlight_keys(
@@ -127,6 +140,9 @@ ggkeyboard(sixty_percent, palette = keyboard_palette("magic")) |>
 
 ```
 ```{r}
+#| label: first-letter
+#| message: false
+
 # Keys dataset, filter for first_letters
 keys <- read_csv("https://raw.githubusercontent.com/sharlagelfand/ggkeyboard/061f0d9084d76d576200e81439311983e1d50d93/data-raw/sixty_percent.csv")
 wordle_counts_ordered <- keys |>
@@ -138,6 +154,9 @@ keys
 ```
 
 ```{r}
+#| label: keyboard1-display
+#| message: false
+
 # Assigning the colors to keys
 ggkeyboard(sixty_percent, palette = keyboard_palette("magic")) |>
   highlight_keys(
@@ -147,5 +166,134 @@ ggkeyboard(sixty_percent, palette = keyboard_palette("magic")) |>
     color = NA
     )
 ```
+## Custom Task: Change theme and add support for 2nd and 3rd letter frequency
 
-change the background of the keyboard and non-letter keys and add a legend.
+```{r}
+#| label: packages
+#| message: false
+
+# Adding a Theme
+ggkeyboard(sixty_percent, palette = keyboard_palette("serika")) |>
+  highlight_keys(
+    keys = wordle_counts_ordered$key, 
+    fill = wordle_counts_ordered$color, 
+    alpha = 0.7, 
+    color = NA
+    ) 
+```
+## 2nd Letter
+```{r}
+#| label: 2nd-letter
+#| message: false
+
+# Add second letter column
+wordle <- wordle |> 
+  mutate(second_letter = str_sub(word, start = 2, end = 2))
+
+# Count the number of entries with a given first letter
+wordle_counts2 <- wordle |>
+  count(second_letter, sort = TRUE)
+
+# Summarize min, max, sd, and quantiles
+wordle_counts2 |>
+  summarize(
+    min = min(n),
+    mean = mean(n),
+    sd = sd(n),
+    max = max(n),
+    q20 = quantile(n, 0.20),
+    q40 = quantile(n, 0.40),
+    q60 = quantile(n, 0.60),
+    q80 = quantile(n, 0.80)
+  )
+
+# Assign colors to frequency
+wordle_counts2 <- wordle_counts2 |>
+  mutate(
+    color = case_when(
+      n == 0                  ~ "#FFEBE3",
+      n <=  20                ~ "#F8D3CE",
+      n > 20  & n <= 189      ~ "#F0B8A1",
+      n > 189 & n <= 325      ~ "#E89E7F",
+      n > 325 & n <= 595      ~ "#DC8461",
+      n > 595 & n <= 1000     ~ "#D16A44",
+      n > 1000  ~ "#C65027"
+      ),
+    second_letter = str_to_upper(second_letter)
+  ) |>
+  arrange(second_letter)
+
+# Order keys
+wordle_counts2_ordered <- keys |>
+  filter(key_label %in% LETTERS) |>
+  select(key) |>
+  left_join(wordle_counts2, by = c("key" = "second_letter"))
+
+# Assigning the colors to keys
+ggkeyboard(sixty_percent, palette = keyboard_palette("serika")) |>
+  highlight_keys(
+    keys = wordle_counts2_ordered$key, 
+    fill = wordle_counts2_ordered$color, 
+    alpha = 0.7, 
+    color = NA
+    )
+```
+
+## 3rd Letter
+
+```{r}
+#| label: third-letter
+#| message: false
+
+# Add third letter column
+wordle <- wordle |> 
+  mutate(third_letter = str_sub(word, start = 3, end = 3))
+
+# Count the number of entries with a given first letter
+wordle_counts3 <- wordle |>
+  count(third_letter, sort = TRUE)
+
+# Summarize min, max, sd, and quantiles
+wordle_counts3 |>
+  summarize(
+    min = min(n),
+    mean = mean(n),
+    sd = sd(n),
+    max = max(n),
+    q20 = quantile(n, 0.20),
+    q40 = quantile(n, 0.40),
+    q60 = quantile(n, 0.60),
+    q80 = quantile(n, 0.80)
+  )
+
+# Assign colors to frequency
+wordle_counts3 <- wordle_counts3 |>
+  mutate(
+    color = case_when(
+      n == 0                  ~ "#FFEBE3",
+      n <=  20                ~ "#F8D3CE",
+      n > 20  & n <= 189      ~ "#F0B8A1",
+      n > 189 & n <= 325      ~ "#E89E7F",
+      n > 325 & n <= 595      ~ "#DC8461",
+      n > 595 & n <= 1000     ~ "#D16A44",
+      n > 1000  ~ "#C65027"
+      ),
+    third_letter = str_to_upper(third_letter)
+  ) |>
+  arrange(third_letter)
+
+# Order keys
+wordle_counts3_ordered <- keys |>
+  filter(key_label %in% LETTERS) |>
+  select(key) |>
+  left_join(wordle_counts3, by = c("key" = "third_letter"))
+
+# Assigning the colors to keys
+ggkeyboard(sixty_percent, palette = keyboard_palette("serika")) |>
+  highlight_keys(
+    keys = wordle_counts3_ordered$key, 
+    fill = wordle_counts3_ordered$color, 
+    alpha = 0.7, 
+    color = NA
+    )
+```
