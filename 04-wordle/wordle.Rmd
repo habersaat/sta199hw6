@@ -89,7 +89,7 @@ Custom Colors
 ```{r}
 
 # Color coding
-wordle_counts <- wordle_counts %>%
+wordle_counts <- wordle_counts %|>
   mutate(
     color = case_when(
       n == 0                  ~ "#FFEBE3",
@@ -101,7 +101,7 @@ wordle_counts <- wordle_counts %>%
       n > 1000  ~ "#C65027"
       ),
     first_letter = str_to_upper(first_letter)
-  ) %>%
+  ) |>
   arrange(first_letter)
 
 wordle_counts
@@ -110,14 +110,14 @@ wordle_counts
 
 ```{r}
 # Giving keys colors
-ggkeyboard(sixty_percent, palette = keyboard_palette("magic")) %>%
+ggkeyboard(sixty_percent, palette = keyboard_palette("magic")) |>
   highlight_keys(
     keys = c("Z", "X", "C", "V"), 
     fill = c("#00FF00", "#FF00FF", "#00FFFF", "#FFA500"), 
     alpha = 0.7, 
     colour = NA
     )
-ggkeyboard(sixty_percent, palette = keyboard_palette("magic")) %>%
+ggkeyboard(sixty_percent, palette = keyboard_palette("magic")) |>
   highlight_keys(
     keys = c("C", "N", "S"), 
     fill = c("#00FF00", "#FF00FF", "#00FFFF"), 
@@ -129,20 +129,23 @@ ggkeyboard(sixty_percent, palette = keyboard_palette("magic")) %>%
 ```{r}
 # Keys dataset, filter for first_letters
 keys <- read_csv("https://raw.githubusercontent.com/sharlagelfand/ggkeyboard/061f0d9084d76d576200e81439311983e1d50d93/data-raw/sixty_percent.csv")
-wordle_counts_ordered <- keys %>% 
-  filter(key_label %in% LETTERS) %>%
-  select(key) %>%
+wordle_counts_ordered <- keys |>
+  filter(key_label %in% LETTERS) |>
+  select(key) |>
   left_join(wordle_counts, by = c("key" = "first_letter"))
+
 keys
 ```
 
 ```{r}
 # Assigning the colors to keys
-ggkeyboard(sixty_percent, palette = keyboard_palette("magic")) %>%
+ggkeyboard(sixty_percent, palette = keyboard_palette("magic")) |>
   highlight_keys(
     keys = wordle_counts_ordered$key, 
     fill = wordle_counts_ordered$color, 
     alpha = 0.7, 
-    colour = NA
+    color = NA
     )
 ```
+
+change the background of the keyboard and non-letter keys and add a legend.
