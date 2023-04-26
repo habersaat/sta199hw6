@@ -18,6 +18,22 @@ library(ggkeyboard) # https://github.com/sharlagelfand/ggkeyboard
 
 From https://github.com/tabatkins/wordle-list.
 
+```{r}
+
+# read wordle dataset
+wordle <- read_csv("https://raw.githubusercontent.com/tabatkins/wordle-list/main/words", col_names = "word")
+
+# Add first letter column
+wordle <- wordle |> 
+  mutate(first_letter = str_sub(word, start = 1, end = 1))
+
+# Count the number of entries with a given first letter
+wordle_counts <- wordle |>
+  count(first_letter, sort = TRUE)
+
+wordle_counts
+```
+
 ## Task 2: Draw a keyboard
 
 
