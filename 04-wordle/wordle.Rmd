@@ -36,6 +36,8 @@ wordle_counts
 
 ## Task 2: Draw a keyboard
 
-
+```{r}
+ggkeyboard(tkl, layout = "iso")
+```
 
 ## Task 3: Color keyboard keys based on frequency of first letter
