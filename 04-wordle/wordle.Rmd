@@ -1,7 +1,7 @@
 ---
-title: "Wordle on keyboard"
-subtitle: "Coding out loud, Ep 4"
-author: "Mine Çetinkaya-Rundel + Martha Aboagye"
+title: "Wordle Clone"
+subtitle: "Adapted from Coding out loud, Ep 4"
+author: "Hunter Habersaat"
 output: github_document
 ---
 
